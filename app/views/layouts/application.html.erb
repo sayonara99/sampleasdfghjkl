@@ -1,14 +1,12 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Appapp</title>
-    <%= csrf_meta_tags %>
-
-    <%= stylesheet_link_tag    'application', media: 'all', 'data-turbolinks-track': 'reload' %>
-    <%= javascript_include_tag 'application', 'data-turbolinks-track': 'reload' %>
+    <title><%= yield(:title) %> | Ruby on Rails Tutorial Sample App</title>
+    <%= render 'layouts/shim' %>
   </head>
 
   <body>
     <%= yield %>
+    <!-- this is responsible for inserting the contents of each page into the layout through process: convert contents of the document to HTML and then inserting it in place of this tag -->
   </body>
 </html>
