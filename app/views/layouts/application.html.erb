@@ -10,6 +10,9 @@
   	<%= render 'layouts/header' %>
     
     <div class="container">
+      <% flash.each do |message_type, message| %>
+        <%= content_tag(:div, message, class: "alert alert-#{message_type}") %>
+      <% end %>
     	<%= yield %>
       <!-- this is responsible for inserting the contents of each page into the layout through process: convert contents of the document to HTML and then inserting it in place of this tag -->
       <%= render 'layouts/footer' %>
