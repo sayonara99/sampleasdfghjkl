@@ -20,6 +20,15 @@ class User < ApplicationRecord
   validates :email, presence: true, length: { maximum: 255 }, 
                                     format: { with: VALID_EMAIL_REGEX },
                                     uniqueness: { case_sensitive: false }
-                                      
+
+  has_secure_password
+  # this method adds
+  # 1. the ability to save a securely hashed password_digest attribute to the database
+  # 2. A pair of virtual attributes (password and password_confirmation), including presence validations upon 
+  # object creation and a validation requiring that they match
+  # 3. An authenticate method that returns the user when the password is correct (and returns false otherwise)
+  # the corresponding model must have an attribute password_digest                        
+  validates :password, presence: true, length: { minimum: 6, maximum: 72 }, 
+                                       allow_nil: true    
 
 end

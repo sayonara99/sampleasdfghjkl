@@ -1,0 +1,24 @@
+<% provide(:title, @user.name) %>
+<!-- the @user here is defined in users controller -->
+
+<div class="row">
+  <aside class="col-md-4">
+  	<section class="user_info">
+  		<h1>
+  			<%= gravatar_for @user %>
+  			<%= @user.name %>
+  		</h1>
+  	</section>
+  	<section class="user_info">
+  		<p>
+	      Date joined: <%= @user.created_at.in_time_zone("Singapore").strftime("%B #{@user.created_at.day.ordinalize}, %Y %I:%M%p") %>
+	  
+	      <br/>
+	      Time now: <%= Time.now.in_time_zone("Singapore").strftime("%B #{@user.created_at.day.ordinalize}, %Y %I:%M%p") %>
+	  
+	      <br/>
+      </p>
+  	</section>
+  </aside>
+</div>
+  
