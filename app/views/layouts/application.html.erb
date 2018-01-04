@@ -2,11 +2,17 @@
 <html>
   <head>
     <title><%= full_title(yield(:title)) %></title>
+    <%= render 'layouts/rails_default' %>
     <%= render 'layouts/shim' %>
   </head>
 
   <body>
-    <%= yield %>
-    <!-- this is responsible for inserting the contents of each page into the layout through process: convert contents of the document to HTML and then inserting it in place of this tag -->
+  	<%= render 'layouts/header' %>
+    
+    <div class="container">
+    	<%= yield %>
+      <!-- this is responsible for inserting the contents of each page into the layout through process: convert contents of the document to HTML and then inserting it in place of this tag -->
+      <%= render 'layouts/footer' %>
+    </div>
   </body>
 </html>
