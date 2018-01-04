@@ -29,6 +29,17 @@ class User < ApplicationRecord
   # 3. An authenticate method that returns the user when the password is correct (and returns false otherwise)
   # the corresponding model must have an attribute password_digest                        
   validates :password, presence: true, length: { minimum: 6, maximum: 72 }, 
-                                       allow_nil: true    
+                                       allow_nil: true
+  
+  # Returns the hash digest of the given string.
+  def User.digest(string)
+    cost = ActiveModel::SecurePassword.min_cost ? BCrypt::Engine::MIN_COST :
+                                                  BCrypt::Engine.cost
+    # this uses the minimum cost parameter (MIN_COST) in tests and a normal cost parameter (cost) in production
+    BCrypt::Password.create(string, cost: cost)
+    # string is the string to be hashed and cost is the cost parameter that determines
+    # the computational cost to calculate the hash
+  end
+
 
 end
