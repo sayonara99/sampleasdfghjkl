@@ -9,7 +9,7 @@ class SessionsController < ApplicationController
   	  log_in @user
       params[:session][:remember_me] == '1' ? remember(@user) : forget(@user)
       # if '1', remember user, else, forget user
-  	  redirect_to @user
+  	  redirect_back_or @user
   	  # same as   user_url(user)
   	elsif params[:session][:email].blank?
   		flash.now[:danger] = "Enter your email and password"
