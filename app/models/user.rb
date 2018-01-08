@@ -1,10 +1,13 @@
 class User < ApplicationRecord
+  # this is quivalent to writing just:
+  # microposts
 # User class inherits from the ApplicationRecord class, which in turn inherits from the AciveRecord::Base class
 # such that User model has all the functionality of the ActiveRecord::Base class.
 # Active REcord takes data stored in a database table using rows and columns, which needs to be modified or retrieved
 # by writing SQL statesments(if the database is SQL), and Active Record lets you interact with that data as though
 # it was a normal Ruby object.
-
+  has_many :microposts, dependent: :destroy
+  # dependent: :destroy arranges for the dependent microposts to be destroyed when the user itself is destroyed
   attr_accessor :remember_token
 
   before_save { email.downcase! }
@@ -64,5 +67,16 @@ class User < ApplicationRecord
   def forget
     update_attribute(:remember_digest, nil)
   end
+
+  # Defines a proto-feed.
+  def feed
+    Micropost.where("user_id = ?", id)
+    # the ? ensures that the id is properly escaped before being included in the underlying SQL query
+    # this is quivalent to writing just:
+    # microposts
+  end
+  
+
+    private
   
 end
