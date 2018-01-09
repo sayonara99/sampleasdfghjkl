@@ -8,6 +8,23 @@ class User < ApplicationRecord
 # it was a normal Ruby object.
   has_many :microposts, dependent: :destroy
   # dependent: :destroy arranges for the dependent microposts to be destroyed when the user itself is destroyed
+  has_many :active_relationships, class_name: "Relationship", 
+                                  foreign_key: "follower_id", 
+                                  dependent: :destroy
+  # we don't use :relationships directly because there are passive&active relationships
+  # but we can tell Rails the model class name to look for using class_name: "Relationship"
+  has_many :following, through: :active_relationships, source: :followed
+  # a user has many following through relationships
+  # by default, has_many through: association looks for a foreign key corresponding to the singular version of the association
+  # ex. has_many :followeds, through: :active_relationships will look for a foreign key :followed
+  # but this is awkward, so we change to :following, with source: :followed
+  # this leads to combination of Active Record and array-like behaviour => can use include? method and find method
+  # and we can add and delete elements i.e. << user or .delete(user)
+  has_many :passive_relationships, class_name: "Relationship",
+                                   foreign_key: "followed_id",
+                                   dependent: :destroy
+  has_many :followers, through: :passive_relationships # , source: :follower
+
   attr_accessor :remember_token
 
   before_save { email.downcase! }
@@ -68,15 +85,57 @@ class User < ApplicationRecord
     update_attribute(:remember_digest, nil)
   end
 
-  # Defines a proto-feed.
   def feed
-    Micropost.where("user_id = ?", id)
+    # Micropost.where("user_id = ?", id)
     # the ? ensures that the id is properly escaped before being included in the underlying SQL query
-    # this is quivalent to writing just:
-    # microposts
+    # this picks out all the microposts with user id corresponding to the current user
+
+    # we need to select all the microposts from the microposts table, with ids corresponding to the users being followed
+    # by a given user; this can be written schematically as:
+    # SELECT * FROM microposts
+    # WHERE user_id IN (<list of ids>) OR user_id = <user id>
+    # (SQL supports an IN key word that allows us to test for set inclusion)
+    # we need an array of ids corresponding to the users being followed.
+    # one way to do this is using Ruby's map method,
+    # [1, 2, 3, 4].map { |i| i.to_s } => ["1", "2", "3", "4"]
+    # or [1, 2, 3, 4].map(&:to_s)
+    # constructing the necessary array of followed user ids
+    # User.first.following.map(&:id) => [3, 4, 5, 6, ..., 50]
+    # or User.first.following_ids => [               ]
+    # but we can accomplish this with the below
+
+    # Micropost.where("user_id IN (:following_ids) OR user_id = :user_id", following_ids: following_ids, user_id: id)
+    # we can replace following_ids  with  following_ids = "SELECT followed_id FROM relationships
+    #                                                      WHERE follower_id = :user_id"
+    # the entire select for user 1 would look like:
+    # SELECT * FROM microposts
+    # WHERE user_id IN (SELECT followed_id FROM relationships
+    #                   WHERE follower_id = 1)
+    #       OR user_id = 1
+    following_ids = "SELECT followed_id FROM relationships
+                     WHERE follower_id = :user_id"
+    Micropost.where("user_id IN (#{following_ids})
+                     OR user_id = :user_id", user_id: id)
+  end
+
+  # Follows a user.
+  def follow(other_user)
+    active_relationships.create(followed_id: other_user.id)
+    # or
+    # following << other_user
+  end
+
+  # Unfollows a user.
+  def unfollow(other_user)
+    following.delete(other_user)
+  end
+
+  # Returns true if the current user is following the other user.
+  def following?(other_user)
+    following.include?(other_user)
   end
   
 
-    private
+  private
   
 end
